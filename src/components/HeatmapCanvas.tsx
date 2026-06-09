@@ -1,6 +1,7 @@
 import { useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
 import type { HeatmapDataset, HeatmapConfig, ColorStop } from '../types'
 import { getModePixels, renderHeatmap, computeDiffPixels, exportCanvasToPNG, downloadDataURL } from '../utils/heatmapEngine'
+import { calcImageRect, remapPixelsToImageRect } from '../utils/imageTransform'
 
 export interface HeatmapCanvasHandle {
   exportPNG: (withBackground: boolean) => void
@@ -27,41 +28,6 @@ export const HeatmapCanvas = forwardRef<HeatmapCanvasHandle, Props>(function Hea
   const heatCanvasRef = useRef<HTMLCanvasElement>(null)
   const displayCanvasRef = useRef<HTMLCanvasElement>(null)
 
-  type ImageRect = { dx: number; dy: number; dw: number; dh: number }
-  const calcImageRect = (): ImageRect => {
-    if (!backgroundImage) return { dx: 0, dy: 0, dw: pageWidth, dh: pageHeight }
-    const imgRatio = backgroundImage.width / backgroundImage.height
-    const canvasRatio = pageWidth / pageHeight
-    let dw: number, dh: number, dx: number, dy: number
-    if (imgRatio > canvasRatio) {
-      dh = pageHeight
-      dw = backgroundImage.width * (pageHeight / backgroundImage.height)
-      dx = (pageWidth - dw) / 2
-      dy = 0
-    } else {
-      dw = pageWidth
-      dh = backgroundImage.height * (pageWidth / backgroundImage.width)
-      dx = 0
-      dy = (pageHeight - dh) / 2
-    }
-    return { dx, dy, dw, dh }
-  }
-
-  const remapPixelsToImageRect = <T extends { x: number; y: number }>(
-    pixels: T[],
-    srcPageWidth: number,
-    srcPageHeight: number,
-    rect: ImageRect
-  ): T[] => {
-    const scaleX = rect.dw / srcPageWidth
-    const scaleY = rect.dh / srcPageHeight
-    return pixels.map(p => ({
-      ...p,
-      x: rect.dx + p.x * scaleX,
-      y: rect.dy + p.y * scaleY
-    }))
-  }
-
   useImperativeHandle(ref, () => ({
     exportPNG: (withBackground: boolean) => {
       if (!heatCanvasRef.current || !displayCanvasRef.current) return
@@ -81,7 +47,7 @@ export const HeatmapCanvas = forwardRef<HeatmapCanvasHandle, Props>(function Hea
     ctx.clearRect(0, 0, pageWidth, pageHeight)
 
     if (backgroundImage) {
-      const { dx, dy, dw, dh } = calcImageRect()
+      const { dx, dy, dw, dh } = calcImageRect(backgroundImage, pageWidth, pageHeight)
       ctx.drawImage(backgroundImage, dx, dy, dw, dh)
     } else {
       ctx.fillStyle = '#1a1a2e'
@@ -116,7 +82,7 @@ export const HeatmapCanvas = forwardRef<HeatmapCanvasHandle, Props>(function Hea
     ctx.clearRect(0, 0, pageWidth, pageHeight)
 
     let gradient: ColorStop[] = config.gradient
-    const imageRect = calcImageRect()
+    const imageRect = calcImageRect(backgroundImage, pageWidth, pageHeight)
     const srcW = datasetA.pageWidth
     const srcH = datasetA.pageHeight
     let pixels = remapPixelsToImageRect(
