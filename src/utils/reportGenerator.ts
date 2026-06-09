@@ -1,4 +1,4 @@
-import type { HeatmapDataset, ReportData, HeatmapMode, HotSpot } from '../types'
+import type { HeatmapDataset, ReportData, HeatmapMode, HotSpot, ClickData, ScrollData, AttentionPoint } from '../types'
 import { getModePixels, findTopHotSpots, normalizeValues } from './heatmapEngine'
 
 export function generateReport(
@@ -12,11 +12,11 @@ export function generateReport(
     10
   )
 
-  const totalClicks = dataset.clicks.reduce((sum, c) => sum + c.count, 0)
+  const totalClicks = dataset.clicks.reduce((sum: number, c: ClickData) => sum + c.count, 0)
 
-  const totalDuration = dataset.scrolls.reduce((sum, s) => sum + s.duration, 0)
+  const totalDuration = dataset.scrolls.reduce((sum: number, s: ScrollData) => sum + s.duration, 0)
   let weightedDepth = 0
-  dataset.scrolls.forEach(s => {
+  dataset.scrolls.forEach((s: ScrollData) => {
     weightedDepth += s.scrollTop * s.duration
   })
   const avgScrollDepth = totalDuration > 0
@@ -24,7 +24,7 @@ export function generateReport(
     : 0
 
   const maxAttentionDuration = dataset.attentions.reduce(
-    (max, a) => Math.max(max, a.duration),
+    (max: number, a: AttentionPoint) => Math.max(max, a.duration),
     0
   )
 
@@ -59,7 +59,7 @@ export function formatReportAsCSV(report: ReportData, mode: HeatmapMode): string
     '排名,X坐标,Y坐标,数值'
   ]
 
-  report.topSpots.forEach(spot => {
+  report.topSpots.forEach((spot: HotSpot) => {
     lines.push(`${spot.rank},${spot.x},${spot.y},${spot.value}`)
   })
 
