@@ -94,8 +94,6 @@ export function normalizeValues(pixels: HeatmapPixel[]): { pixels: HeatmapPixel[
 export function computeDiffPixels(
   pixelsA: HeatmapPixel[],
   pixelsB: HeatmapPixel[],
-  width: number,
-  height: number,
   mode: 'absolute' | 'percentage'
 ): HeatmapPixel[] {
   const gridSize = 20
@@ -142,8 +140,6 @@ export function computeDiffPixels(
     })
   }
 
-  void width
-  void height
   return result
 }
 
@@ -160,7 +156,7 @@ export function renderHeatmap(
   }
 ): void {
   const { pixels: normalizedPixels } = normalizeValues(pixels)
-  const palette = getGradientPalette(ctx, config.gradient)
+  const palette = getGradientPalette(config.gradient)
 
   const shadowCanvas = document.createElement('canvas')
   shadowCanvas.width = width

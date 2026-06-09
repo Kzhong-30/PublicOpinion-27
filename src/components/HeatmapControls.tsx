@@ -1,6 +1,14 @@
 import type { HeatmapConfig, HeatmapMode, ColorStop } from '../types'
 import { GRADIENT_PRESETS } from '../utils/gradients'
 
+function colorStopsEqual(a: ColorStop[], b: ColorStop[]): boolean {
+  if (a.length !== b.length) return false
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].position !== b[i].position || a[i].color !== b[i].color) return false
+  }
+  return true
+}
+
 interface Props {
   config: HeatmapConfig
   onChange: (config: HeatmapConfig) => void
@@ -55,7 +63,7 @@ export function HeatmapControls({ config, onChange }: Props) {
       <h3 className="panel-title" style={{ marginTop: 20 }}>🎨 颜色梯度</h3>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
         {GRADIENT_PRESETS.map(preset => {
-          const isActive = JSON.stringify(config.gradient) === JSON.stringify(preset.stops)
+          const isActive = colorStopsEqual(config.gradient, preset.stops as ColorStop[])
           return (
             <button
               key={preset.name}

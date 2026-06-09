@@ -28,7 +28,6 @@ export function generateReport(
     0
   )
 
-  const modeLabel = mode === 'click' ? '点击次数' : mode === 'scroll' ? '停留时长(秒)' : '注意力时长(秒)'
   const finalSpots: HotSpot[] = topSpots.map(s => ({
     ...s,
     value: Math.round(s.value * (mode === 'click' ? 1 : 10)) / 10
@@ -42,8 +41,6 @@ export function generateReport(
     datasetName: dataset.name,
     generatedAt: Date.now()
   }
-
-  void modeLabel
 }
 
 export function formatReportAsCSV(report: ReportData, mode: HeatmapMode): string {

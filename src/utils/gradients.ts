@@ -79,7 +79,7 @@ export function stopsToCanvasGradient(
   return gradient
 }
 
-export function getGradientPalette(_ctx: CanvasRenderingContext2D, stops: ColorStop[]): Uint8ClampedArray {
+export function getGradientPalette(stops: ColorStop[]): Uint8ClampedArray {
   const paletteCanvas = document.createElement('canvas')
   paletteCanvas.width = 256
   paletteCanvas.height = 1
